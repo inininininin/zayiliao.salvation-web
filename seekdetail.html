@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+    <title>救助详情</title>
+    <script src="/salvation/js/jquery-1.11.3.js"></script>
+    <script src="/salvation/js/user-api.js"></script>
+    <script src="/salvation/js/common-api.js"></script>
+    <script src="/salvation/js/oss-api.js"></script>
+    <script src="/salvation/js/util.js"></script>
+
+    <style>
+        #imgBox{
+            width: 100%;
+            height: 200%;
+            float: left;
+            background-color: rgba(0,0,0,0.8);
+            position: absolute;
+            z-index: 222;
+            display: none;
+        }
+        #imgBox>img{
+            width: 80%;
+            margin:10%;
+            position: fixed;
+            line-height: normal;
+        }
+
+
+    </style>
+
+</head>
+<div id="imgBox">
+    <img id="zoomImg"/>
+</div>
+<body style="margin: 0;background-color: #f2f2f2">
+<div style="background-color: white;padding-top:20px;">
+    <div class="title" style="font-size: 18px;margin:0 15px 10px 15px;color: #333;font-weight:900;"></div>
+    <div class="endTime" style="font-size: 12px;margin:0 15px 13px 15px;color: #666;">截止日期</div>
+    <div class="pics" style="padding:0 15px 0 15px;">
+    </div>
+</div>
+
+<div style="font-size: 14px;color: #333;font-weight: 900;height:45px;margin-left:15px;">
+    <div style="padding-top:20px;">项目进展</div>
+</div>
+
+<div style="width:100%;height:100px;clear: both;margin:auto;background-color: white;">
+    <div style="width:32%;float: left;text-align: center;margin-top:30px;">
+        <div style="font-size: 13px;color: #666;">目标金额</div>
+        <div class="goalAmount" style="font-size: 16px;color: #333;font-weight: 900;margin-top: 6px;">1</div>
+    </div>
+    <div style="float: left;width:1%;margin-top:30px;">
+        <div style="border-left-color:#e5e5e5;height:30px;border-left-width: 1px;border-left-style: solid;"></div>
+    </div>
+    <div style="width:32%;float: left;text-align: center;margin-top:30px;">
+        <div style="font-size: 13px;color: #666;">已完成</div>
+        <div class="donateAmount" style="font-size: 16px;color: #333;font-weight: 900;margin-top: 6px;">1</div>
+    </div>
+    <div style="float: left;width:1%;margin-top:30px;">
+        <div style="border-left-color:#e5e5e5;height:30px;border-left-width: 1px;border-left-style: solid;"></div>
+    </div>
+    <div style="width:32%;margin:auto;float: left;text-align: center;margin-top:30px;">
+        <div style="font-size: 13px;color: #666;">人次</div>
+        <div class="donateCount" style="font-size: 16px;color: #333;font-weight: 900;margin-top: 6px;">1</div>
+    </div>
+</div>
+<!-- <div style="height:100px;clear: both;background-color: white;padding:">
+     <div style="width:33%;float: left;text-align: center;">
+         <div>目标金额</div>
+         <div class="goalAmount" style="margin-top:30px">1</div>
+     </div>
+     <div style="width:33%;float: right;text-align: center">
+         <div>已完成</div>
+         <div class="donateAmount" style="margin-top:30px">1</div>
+     </div>
+     <div style="width:33%;margin:auto;text-align: center">
+         <div >人次</div>
+         <div class="donateCount" style="margin-top:30px">1</div>
+     </div>
+ </div>-->
+<div style="font-size: 14px;color: #333;font-weight: 900;height:45px;margin-left:15px;">
+    <div style="padding-top:20px;">简介</div>
+</div>
+
+<div class="description"
+     style="word-break : break-all;padding:15px;background-color: white;font-size: 14px;color: #333;">
+
+
+</div>
+<div style="font-size: 14px;color: #333;font-weight: 900;height:45px;margin-left:15px;">
+    <div style="padding-top:20px;">主要关系</div>
+</div>
+
+<div style="padding:0 15px;background-color: white;border-bottom: solid 1px #ccc;height:45px;font-size: 14px;color:#333;line-height: 50px;"
+     class="patientRealname"><span class="content"></span><span class="auth"
+                                                                style="background-color: #5b81d7;border-radius:10px;overflow: hidden; height:18px;font-size: 12px;color:white;padding:0 6px;margin-left:4px;"></span>
+</div>
+<div style="padding:0 15px;background-color: white;height:45px;font-size: 14px;color:#333;line-height: 50px;"
+     class="parentRealname"></div>
+
+<div style="margin:8px 15px 0  15px;;font-size: 12px;color: #666;">＊发起人已承诺所提供的文字与图片完全真实，无任何虚构及隐瞒真相的情况，如有不实，发起人愿承担法律责任。
+</div>
+
+<div style="font-size: 14px;color: #333;font-weight: 900;height:45px;margin-left:15px;">
+    <div style="padding-top:20px;">动态</div>
+</div>
+<div id="donateList">
+    <div id="donateTmp"
+         style="display:none;background-color: white;border-bottom: solid 1px #ccc;height:45px;font-size: 14px;color:#333;padding:0 15px;line-height:50px;"></div>
+
+</div>
+
+<div style="margin-bottom: 45px;"></div>
+
+<div class="displayNum" style="display:none;color: white;position: fixed;bottom: 0;width: 100%;font-size: 16px;height:45px;line-height: 50px;"><a
+        class="donate"
+        style="background-color: #70ba2d;width:50%;display: inline-block;text-align: center;text-decoration: none;color:white;">爱心捐助</a><a
+        style="width:50%;display: inline-block;text-align: center;background-color: #5c81d9;">帮忙转发</a></div>
+
+</body>
+
+<script>
+    var seekId = util.getUrlParam('seekId');
+var displayNum=localStorage.getItem("displayNum")
+    if(displayNum==1){
+        $('.displayNum').css('display','block')
+        $('.pics').css('display','none')
+    }
+    userApi.api10044({seekId: seekId}, function (data) {
+        if (data.code == 0) {
+            var donateList = $('#donateList');
+            $(data.data.items).each(function (index, element) {
+                var newDonate = $('#donateTmp').clone(true);
+                donateList.append(newDonate);
+                newDonate.css('display', 'block');
+                newDonate.text(element.realname + '支持了' + element.amount + '元。')
+            })
+        }
+
+    })
+
+    userApi.api10052(seekId, function (data) {
+        $('.donate').attr('href', 'donate.html?seekId=' + seekId);
+        sessionStorage.setItem('seekId' + seekId, data.data);
+        $('.title').text(data.data.title);
+        $('.description').text(data.data.description);
+
+        $('.patientRealname .content').text('患者：' + data.data.patientRealname);
+        $('.patientRealname .auth').text(data.data.type=='HOSPITAL'? data.data.hospital.name +'认证':'个人申报');
+        $('.parentRealname').text('收款人：' + data.data.parentRealname);
+        $('.goalAmount').text(data.data.goalAmount);
+        $('.donateAmount').text(data.data.donateAmount);
+        $('.donateCount').text(data.data.donateCount);
+        var endTime = new Date(1497225600000);
+        $('.endTime').text('截至日期：' + endTime.toLocaleString());
+
+        if (data.data.pic)
+            $(data.data.pic.split(',')).each(function (index, element) {
+                if (element) {
+                    if ((index + 1) % 4 != 0)
+                        $('.pics').append('<img style="width:22%;margin-right:10px;margin-bottom:10px" src="' + element + '" />')
+                    else
+                        $('.pics').append('<img style="width:22%;margin-bottom:10px" src="' + element + '" />')
+                }
+            });
+    })
+    $().ready(function(){
+        var width=window.screen.width*0.22
+//        alert(width)
+        $('.pics img').css('height',width+'px')
+    })
+    $('.pics img').click(function(){
+        $('#imgBox').css('display','block');
+        $('#zoomImg').attr('src',$(this).attr('src'));
+    })
+//    $('.innerImg').on('click','img',function(){
+////            alert("1111")
+//
+//    });
+    $('#zoomImg').click(function(){
+//            alert("222")
+        $('#imgBox').css('display','none');
+    })
+    $('#hospitalName_2').click(function(){
+        location.href = $(this).attr('href');
+    })
+</script>
+
+
+</html>

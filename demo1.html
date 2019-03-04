@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>demo</title>
+    <script src="http://static.runoob.com/assets/vue/1.0.11/vue.min.js"></script>
+</head>
+<body id="app">
+    <input v-model="name" type="text"/><br/><br/>
+    <input v-model="age" type="text"/><br/><br/>
+    <input v-model="sex" type="text"/><br/><br/>
+    <button type="button" @click="getVal">save</button>
+    <script>
+        var vm = new Vue({
+            el: '#app',
+            data:{
+                name:'',
+                age:'',
+                sex:''
+            },
+            methods:{
+                getVal: function(){
+                    console.log('name ' + vm.$data.name);
+                    console.log('age ' + vm.$data.age);
+                    console.log('sex ' + this.sex)
+                }
+            }
+        })
+    </script>
+</body>
+</html>

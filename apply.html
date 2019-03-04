@@ -1,0 +1,438 @@
+<!DOCTYPE html >
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>发起求助</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1,minimum-scale=1,user-scalable=no">
+    <link href="/salvation/css/weui.css" rel="stylesheet">
+    <link rel="stylesheet" href="/salvation/css/jquery.fileupload.css">
+    <link rel="stylesheet" href="/salvation/css/apply.css">
+    <script src="/salvation/js/jquery-1.11.3.js"></script>
+    <script src="/salvation/js/FileUpload/js/vendor/jquery.ui.widget.js"></script>
+    <script src="/salvation/js/FileUpload/js/jquery.iframe-transport.js"></script>
+    <script src="/salvation/js/FileUpload/js/jquery.fileupload.js"></script>
+    <script src="/salvation/js/ajaxfileupload.js"></script>
+    <!--引入CSS-->
+    <link rel="stylesheet" type="text/css" href="/salvation/js/webuploader/webuploader.css">
+    <script src="http://apps.bdimg.com/libs/jquery.cookie/1.4.1/jquery.cookie.js"></script>
+    <!--引入JS-->
+    <script type="text/javascript" src="/salvation/js/webuploader/webuploader.js"></script>
+    <style>
+        body{
+            color: #333;
+            line-height: 1em;
+            padding: 0 0;
+            /*background-color: #f2f2f2;*/
+        }
+        .title{
+            height: 25px;
+        }
+        .pop{
+            display: none;
+            position: fixed;
+            width: 120px;
+            height: 120px;
+            top: 40%;
+            left: 35%;
+            background: #000000;
+            color: #ffffff;
+            text-align: center;
+            z-index: 100;
+            opacity: 0.8;
+            font-size: 14px;
+            border-radius: 5px;
+        }
+    </style>
+    <script>
+//        $.cookie("donateUserId",'18',{path:"/"})//电脑测试用
+
+        //判断cookie是否有donateUserId。
+        if(!$.cookie("donateUId"))
+            location.href="/salvation/u/f/wx/o2a.jsp?go=apply.html";
+//        if(!$.cookie("donateUserId")){
+//            window.location.replace("/donate/u/f/wx/Oauth2Authorize?go=apply.html")
+//        }else
+//            $(document).ready(function(){
+//                $.ajax( {
+//                    type: 'POST',
+//                    url: '/donate/u/l/user/retrieve/batch?id='+$.cookie("donateUserId"),
+//                    success: function(data){
+//                        if(data.code==0){
+//                            var item = data.data.items[0];
+//                            $('#portraitSrc').attr('src',item.wxHeadImgUrl);
+//                            $('#phone').html(item.phone);
+//                            $('#realname').html(item.realname);
+//                            $('#idCardNo').html(item.idCardNo);
+//                            $('#address').html(item.address);
+//
+//                        }else{
+//                            alert(data.message);
+//                        }
+//                    },
+//                    error: function(xhr,msg,reasonString){
+//                        alert('请求错误，请稍后再试...'+msg+":"+reasonString);
+//                    }
+//                } );
+//            });
+
+
+    </script>
+</head>
+<body>
+    <div class="title">
+        基本信息
+    </div>
+    <div class="weui_cells weui_cells_form weui_cells_access  main_a">
+        <div class="weui_cell lf">
+            <div class="weui_cell_hd a"><label class="weui_label">目标金额</label></div>
+            <div class="weui_cell_bd weui_cell_primary b">
+                <input id="goalAmount" class="weui_input" type="number" pattern="[0-9]*" placeholder="输入目标金额"/>
+            </div>
+        </div>
+        <div class="weui_cell  lf">
+            <div class="weui_cell_hd a"><label class="weui_label">资金用途</label></div>
+            <div class="weui_cell_bd weui_cell_primary b">
+                <input id="raiseUsage" class="weui_input" type="text" placeholder="输入资金用途"/>
+            </div>
+        </div>
+        <div class="weui_cell lf" onclick="jump()">
+            <div class="weui_cell_hd a"><label class="weui_label">救治医院</label></div>
+            <div id="hospitalname" class="weui_cell_bd weui_cell_primary b"></div>
+            <div><img src="/salvation/imgs/enter.png" alt=""  style="width: 6px;height: 12px"></div>
+            <!--<div  class="weui_cell_ft" style="color: #333;font-size: 14px"></div>-->
+            <input id="hospitalid" type="hidden"/>
+        </div>
+        <div class="weui_cell lf">
+            <div class="weui_cell_hd a"><label class="weui_label">截止日期</label></div>
+            <div id="endTime"class="weui_cell_bd weui_cell_primary b"></div>
+            <!--<div class="weui_cell_bd weui_cell_primary b">-->
+                <!--<input id="endTime" type="date" style="border: none;font-size:14px;color: #333;"/>-->
+            <!--</div>-->
+            <!--<div><img src="/salvation/imgs/enter.png" alt=""  style="width: 6px;height: 12px"></div>-->
+            <!--<div class="weui_cell_ft" style="color: #FF9900;font-size: 10px;"></div>-->
+        </div>
+    </div>
+    <div class="weui_cells weui_cells_access main_b">
+        <div class="title">
+                <p>主体资料</p>
+        </div>
+        <div class="weui_cell lf">
+            <div  class="a">标题</div>
+            <div class="weui_cell_bd weui_cell_primary">
+                <input id="title" class="weui_input" type="text" placeholder="输入筹款标题"/>
+            </div>
+        </div>
+        <div class="weui_cell lf">
+            <div  class="a">患者姓名</div>
+            <div class="weui_cell_bd weui_cell_primary">
+                <input id="patientRealname" class="weui_input" type="text" placeholder="输入患者姓名"/>
+            </div>
+        </div>
+        <div class="weui_cell lf">
+            <div  class="a">收款人</div>
+            <div class="weui_cell_bd weui_cell_primary">
+                <input id="parentRealname" class="weui_input" type="text" placeholder="输入亲属姓名"/>
+            </div>
+        </div>
+    </div>
+    <div class="title">
+        详细描述
+    </div>
+    <div style="padding: 5px 15px;height: 140px">
+                <!--<input type="text" name="desceiption" id="desceiption" style="width: 100%;height: 150px;"placeholder="建议详细描述家庭、经济、患病经历" >-->
+                <textarea name="desceiption" id="desceiption" style="width: 100%;height: 138px;border: 0px" placeholder="建议详细描述家庭、经济、患病经历"></textarea>
+    </div>
+    <div class="title">
+            上传图片(最多8张)
+    </div>
+    <div class="weui_cells weui_cells_form" style="margin-top:0; padding-top: 15px;padding-bottom: 15px">
+        <div class="weui_cell">
+            <div class="weui_cell_bd weui_cell_primary7">
+                <div class="weui_uploader">
+                    <div id="localImag" class="weui_uploader_bd">
+                        <!--<label for="upload0"><img id="preview" class="weui_uploader_input_wrp preview" src="/salvation/" /></label>-->
+                        <!--<label for="upload1"><img class="weui_uploader_input_wrp preview" src="/salvation/" /></label>-->
+                        <!--<label for="upload2"><img class="weui_uploader_input_wrp preview" src="/salvation/" /></label>-->
+                        <!--<label for="upload3"><img class="weui_uploader_input_wrp preview" src="/salvation/" /></label>-->
+                        <!--<label for="upload4"><img class="weui_uploader_input_wrp preview" src="/salvation/" /></label>-->
+                        <!--<label for="upload5"><img class="weui_uploader_input_wrp preview" src="/salvation/" /></label>-->
+                        <!--<label for="upload6"><img class="weui_uploader_input_wrp preview" src="/salvation/" /></label>-->
+                        <!--<label for="upload7"><img class="weui_uploader_input_wrp preview" src="/salvation/" /></label>-->
+
+                        <label for="upload0"><div style="float: left; margin-right:7px; width: 80px;height: 80px;margin-bottom: 7px; background: url('imgs/add_picture.png') no-repeat 0 0">
+                            <img id="preview" class="preview" style="width:80px;height: 80px"  src="" />
+                        </div></label>
+                        <label for="upload1"><div style="float: left; margin-right:7px; width: 80px;height: 80px;margin-bottom: 7px; background: url('imgs/add_picture.png') no-repeat 0 0">
+                            <img class="preview" style="width:80px;height: 80px"  src="" />
+                        </div></label>
+                        <label for="upload2"><div style="float: left; margin-right:7px; width: 80px;height: 80px;margin-bottom: 7px; background: url('imgs/add_picture.png') no-repeat 0 0">
+                            <img class="preview" style="width:80px;height: 80px"  src="" />
+                        </div></label>
+                        <label for="upload3"><div style="float: left; margin-right:7px; width: 80px;height: 80px;margin-bottom: 7px; background: url('imgs/add_picture.png') no-repeat 0 0">
+                            <img class="preview" style="width:80px;height: 80px"  src="" />
+                        </div></label>
+                        <label for="upload4"><div style="float: left; margin-right:7px; width: 80px;height: 80px;margin-bottom: 7px; background: url('imgs/add_picture.png') no-repeat 0 0">
+                            <img class="preview" style="width:80px;height: 80px"  src="" />
+                        </div></label>
+                        <label for="upload5"><div style="float: left; margin-right:7px; width: 80px;height: 80px;margin-bottom: 7px; background: url('imgs/add_picture.png') no-repeat 0 0">
+                            <img class="preview" style="width:80px;height: 80px"  src="" />
+                        </div></label>
+                        <label for="upload6"><div style="float: left; margin-right:7px; width: 80px;height: 80px;margin-bottom: 7px; background: url('imgs/add_picture.png') no-repeat 0 0">
+                            <img class="preview" style="width:80px;height: 80px"  src="" />
+                        </div></label>
+                        <label for="upload7"><div style="float: left; margin-right:7px; width: 80px;height: 80px;margin-bottom: 7px; background: url('imgs/add_picture.png') no-repeat 0 0">
+                            <img class="preview" style="width:80px;height: 80px"  src="" />
+                        </div></label>
+                        <div style="display: none">
+                            <form id="uploadForm" enctype ="multipart/form-data" method="post">
+
+                                <!--class="weui_uploader_input"-->
+                                <input  id="upload0"  type="file" name="file" />
+                                <input  id="upload1"  type="file" name="file" />
+                                <input  id="upload2"  type="file" name="file" />
+                                <input  id="upload3"  type="file" name="file" />
+                                <input  id="upload4"  type="file" name="file" />
+                                <input  id="upload5"  type="file" name="file" />
+                                <input  id="upload6"  type="file" name="file" />
+                                <input  id="upload7"  type="file" name="file" />
+
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="loadingToast" class="weui_loading_toast" style="display:none;">
+        <div class="weui_mask_transparent"></div>
+        <div class="weui_toast">
+            <div class="weui_loading">
+                <div class="weui_loading_leaf weui_loading_leaf_0"></div>
+                <div class="weui_loading_leaf weui_loading_leaf_1"></div>
+                <div class="weui_loading_leaf weui_loading_leaf_2"></div>
+                <div class="weui_loading_leaf weui_loading_leaf_3"></div>
+                <div class="weui_loading_leaf weui_loading_leaf_4"></div>
+                <div class="weui_loading_leaf weui_loading_leaf_5"></div>
+                <div class="weui_loading_leaf weui_loading_leaf_6"></div>
+                <div class="weui_loading_leaf weui_loading_leaf_7"></div>
+                <div class="weui_loading_leaf weui_loading_leaf_8"></div>
+                <div class="weui_loading_leaf weui_loading_leaf_9"></div>
+                <div class="weui_loading_leaf weui_loading_leaf_10"></div>
+                <div class="weui_loading_leaf weui_loading_leaf_11"></div>
+            </div>
+            <p class="weui_toast_content">正在提交中</p>
+        </div>
+    </div>
+    <div id="toast" style="display: none;">
+        <div class="weui_mask_transparent"></div>
+        <div class="weui_toast">
+            <i class="weui_icon_toast"></i>
+            <p class="weui_toast_content">提交成功</p>
+        </div>
+    </div>
+
+    <div id="danger" style="display: none;">
+        <div class="weui_mask_transparent"></div>
+        <div class="weui_toast">
+            <i class="weui_icon_safe weui_icon_safe_warn"></i>
+            <p class="weui_toast_content">请先登录</p>
+        </div>
+    </div>
+    <div style="background-color: #f2f2f2;padding-bottom: 45px">
+        <div class="btn">
+            <button id="submit" class="weui_btn" style="color: white;font-size: 16px; height:43px;background-color: #FF8200" href="javascript:">提交申请</button>
+        </div>
+        <p style="color: #666;font-size: 12px;text-align: center;margin-top: 8px;">已阅读并同意 <a href="#" style="color: #666;font-size: 12px;">《扶贫基金发起条款》</a></p>
+    </div>
+<div class="pop">
+    <img src="/salvation/imgs/loading.gif" alt="" style="width: 57px;margin: 19px auto 12px" /><br/>
+    <span style="text-align: center">正在上传</span>
+</div>
+    <script src="/salvation/js/addTmpImg.js"></script>
+    <script src="/salvation/js/common.js"></script>
+    <script src="/salvation/js/o-api.js"></script>
+
+
+    <script>
+        //获取当前时间后的30天为截止时间并且转化显示出来
+        function getLocalTime(nS) {
+            return new Date(parseInt(nS)).toLocaleString().replace(/:\d{1,2}$/,' ');
+        }
+        var current = (new Date()).getTime();
+        var future = current + 30 * 24 * 3600 * 1000;
+        var time=getLocalTime(future);
+//        var time=getLocalTime(future).split("下"||"上");
+//        var time=getLocalTime(future).split("上"||"下");
+//        //截取"上"或者"下"之前的字符串
+        var time1=time[0];
+//        alert(time1)
+        $("#endTime").html(time);
+        function jump(){
+            location.href = 'choiceHospital.html';
+        }
+
+        $('[type="file"]').change(function(e){
+            var id = e.target.id;
+            var count = id.slice(6);
+            console.log(count);
+            //input
+            var docObj = document.getElementById(e.target.id);
+            //img
+            var imgObjPreview = document.getElementsByClassName("preview");
+            //div
+            console.log(imgObjPreview);
+            console.log(typeof  imgObjPreview);
+            var divs = document.getElementById("localImag");
+            if (docObj.files && docObj.files[0]) {
+                    //火狐下，直接设img属性
+                    imgObjPreview[count].style.display = 'block';
+                    imgObjPreview[count].style.width = '80px';
+                    imgObjPreview[count].style.height = '80px';
+                    //imgObjPreview.src = docObj.files[0].getAsDataURL();
+                    //火狐7以上版本不能用上面的getAsDataURL()方式获取，需要一下方式
+                    imgObjPreview[count].src = window.URL.createObjectURL(docObj.files[0]);
+
+
+            } else {
+                //IE下，使用滤镜
+                docObj.select();
+                var localImagId = document.getElementById("localImag");
+                //必须设置初始大小
+                localImagId.style.width = "80px";
+                localImagId.style.height = "80px";
+                //图片异常的捕捉，防止用户修改后缀来伪造图片
+                try {
+                    localImagId.style.filter = "progid:DXImageTransform.Microsoft.AlphaImageLoader(sizingMethod=scale)";
+                    localImagId.filters.item("DXImageTransform.Microsoft.AlphaImageLoader").src = imgSrc;
+                } catch(e) {
+                    alert("您上传的图片格式不正确，请重新选择!");
+                    return false;
+                }
+                imgObjPreview.style.display = 'none';
+                document.selection.empty();
+            }
+            return true;
+        });
+        $(document).ready(function() {
+            var hospitalId =  localStorage.getItem("hospitalId");
+            var hospitalName =  localStorage.getItem("hospitalName");
+            if(hospitalName==''){hospitalName = "个人申报"}
+            var hospitalType =  localStorage.getItem("hospitalType");
+            var goal =  localStorage.getItem("goal");
+            var usage =  localStorage.getItem("usage");
+            $('#hospitalname').html(hospitalName);
+            $('#hospitalid').attr('name',hospitalType);
+            $('#hospitalid').val(hospitalId);
+            $('#goalAmount').val(goal);
+            $('#raiseUsage').val(usage);
+        });
+        $('#goalAmount').blur(function(){
+            var goal = $(this).val();
+            if(goal!=''){
+                localStorage.setItem("goal",goal);
+            }
+        });
+        $('#raiseUsage').blur(function(){
+            var usage = $(this).val();
+            if(usage!=''){
+                localStorage.setItem("usage",usage);
+            }
+        });
+
+
+
+        $('#submit').click(function(){
+          //  var handles = $.addTmpImgs('uploadForm');
+
+
+
+//            var pic={ };
+//            $.each(handles,function(i,val){
+//                pic["pic"+(i+1)] = val;
+//            });
+//            var times=$("#endTime").val();
+            $('.pop').show();
+            var patientRealname = $('#patientRealname').val();
+            var parentRealname = $('#parentRealname').val();
+            var goalAmount = $('#goalAmount').val()*100;
+            var raiseUsage = $('#raiseUsage').val();
+            var type = $('#hospitalid').attr('name');
+            var hospitalId = $('#hospitalid').val();
+            var endTime = future;
+//            var timestamp = Date.parse(new Date());
+//            if(endTime <= timestamp){
+//                alert('结束时间不能小于当前时间');
+//                return;
+//            }
+            var title = $('#title').val();
+            var desceiption = $('#desceiption').val();
+          //  var data = $.extend({'goalAmount':goalAmount,'raiseUsage':raiseUsage,'type':type,'hospitalId':hospitalId,'endTime':endTime,'desceiption':desceiption,'title':title,'patientRealname':patientRealname,'parentRealname':parentRealname},pic);
+            if(goalAmount != ''&& raiseUsage != ''&& type != ''&& hospitalId != ''&& endTime != ''&& title != ''&&desceiption != ''&&patientRealname != ''&&parentRealname != ''){
+
+                var urls;
+               imageService.imagesUpload("uploadForm","/donate/image",function(data){ urls=data.urls});
+                var pics= "";
+                for(var n=0;n<urls.length;n++){
+                    pics=pics+"sPic"+n+"="+urls[n]+"&";
+                }
+                $.ajax({
+                    url:  '/salvation/u/l/seek/c.jsp?'+pics,
+                    type: 'post',
+                    dataType:"json",
+                    data:{'sGoalAmount':goalAmount,'sRaiseUsage':raiseUsage,'sType':type,'hId':hospitalId,'sEndTime':endTime,'sDesceiption':desceiption,'sTitle':title,'sPatientRealname':patientRealname,'sParentRealname':parentRealname},
+                    //                elementIds: elementIds, //传递参数到服务器
+                    success: function(data, status){
+                        if(data.code == 0){
+                                imageService.confirmBatch(urls);
+
+                            $('.pop').hide()
+                         location.href = 'savelist.html'
+                        }else{alert(data.message)}
+
+                    },
+                    error: function(data, status, e){
+                        alert(e);
+                    }
+                });
+            }else{
+                alert('请先完成表单填写');
+            }
+
+
+
+
+//                $.ajax( {
+//                    type: 'POST',
+//                    data: data,
+//                    url: '/donate/seek/publish.act',
+//                    success: function(data){
+//                        if(data.code==0){
+//                            $('#loadingToast').css('display','none');
+//                            $('#toast').css('display','block');
+//                            timer = setTimeout(function(){
+//                                location.href = "savelist.html";
+//                            },1500)
+//                        }else if(data.code==20){
+//                            $('#danger').css('display','block');
+//
+//                            setTimeout(function(){
+//                                location.href = 'login.html?prevurl='+ window.location.href;
+//                            },1500)
+//                        }else{
+//                            alert('请求超时，请稍后重试');
+//                        }
+//                    },
+//                    error: function(xhr,msg,reasonString){
+//                        alert('请求错误，请稍后再试...');
+//                        console.log('error回调函数...响应完成但存在问题');
+//                        console.log(arguments);
+//                    }
+//                } );
+//            }else{
+//                alert('请先填写资料');
+//                $('#loadingToast').css('display','none');
+//            }
+        });
+    </script>
+</body>
+</html>

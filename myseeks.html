@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+    <title>我的发起</title>
+    <script src="/salvation/js/jquery-1.11.3.js"></script>
+    <script src="/salvation/js/user-api.js"></script>
+    <script src="/salvation/js/common-api.js"></script>
+    <script src="/salvation/js/oss-api.js"></script>
+    <script src="http://apps.bdimg.com/libs/jquery.cookie/1.4.1/jquery.cookie.js"></script>
+</head>
+
+<script>
+    var salvationUserToken = $.cookie('salvationUserToken');
+    if (!salvationUserToken) {
+
+        location.href = '/salvation/u/wxoauth2authorize?go=hospitalmsg.html';
+    }
+
+</script>
+<body style="margin: 0;background-color: #f2f2f2">
+
+<div style="margin-bottom: 10px;">
+    <img style="width:100%;height:210px" src="/salvation/picture.jpg"/>
+</div>
+
+<div id="seekList" style="width:100%;">
+
+    <div id="seekTmp" class="seek"
+         style="width:100%;display: none;float: left;margin-bottom: 10px;background-color: white">
+        <div style="margin:14px 15px 25px 15px">
+            <a class="detailPage" href="/salvation/seekdetail.html?seekId=" style=" text-decoration:none;color: black">
+                <div style="width:100%;position: relative;">
+
+                    <img style="vertical-align:middle;height:35px;width:35px;margin-right:8px;border-radius:50%;overflow: hidden; "
+                         src=""/>
+                    <span class="title"
+                          style="vertical-align:middle;font-size:18px;color: #333;word-break : break-all;font-weight:900;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;display: inline-block;width:70%;height:28px;"></span>
+
+                    <div class="description"
+                         style="margin-top:10px;margin-bottom:25px;height:60px;font-size:14px;color: #333;word-break : break-all;overflow: hidden">
+                        <span></span></div>
+                    <div class="status"
+                         style="width:50px;height:18px;position: absolute;top:-14px;right:-15px;font-size: 12px;color: white;background-image: url('state01.png');text-align: center;"></div>
+                    <div style="width:100%;height:45px;clear: both;margin:auto;">
+                        <div style="width:32%;float: left;text-align: center;">
+                            <div style="font-size: 13px;color: #666;">目标金额</div>
+                            <div class="goalAmount"
+                                 style="font-size: 16px;color: #333;font-weight: 900;margin-top: 6px;"></div>
+                        </div>
+                        <div style="float: left;width:1%;">
+                            <div style="border-left-color:#e5e5e5;height:30px;border-left-width: 1px;border-left-style: solid;"></div>
+                        </div>
+                        <div style="width:32%;float: left;text-align: center;">
+                            <div style="font-size: 13px;color: #666;">已完成</div>
+                            <div class="donateAmount"
+                                 style="font-size: 16px;color: #333;font-weight: 900;margin-top: 6px;"></div>
+                        </div>
+                        <div style="float: left;width:1%;">
+                            <div style="border-left-color:#e5e5e5;height:30px;border-left-width: 1px;border-left-style: solid;"></div>
+                        </div>
+                        <div style="width:32%;margin:auto;float: left;text-align: center;">
+                            <div style="font-size: 13px;color: #666;">人次</div>
+                            <div class="donateCount"
+                                 style="font-size: 16px;color: #333;font-weight: 900;margin-top: 6px;"></div>
+                        </div>
+                    </div>
+                </div>
+            </a>
+        </div>
+    </div>
+
+</div>
+</body>
+
+<script>
+    localStorage.removeItem("displayNum")
+    userApi.api10043(function (data) {
+        if (data.code == 0) {
+            $(data.data.items).each(function (index, element) {
+                var seek = $('#seekTmp').clone(true);
+                $(seek).css('display', 'block');
+                $('#seekList').append(seek);
+                $('.seek:last img').attr('src', element.user.headImgUrl);
+                $('.seek:last .title').text(element.title)
+                $('.seek:last .description').text(element.description)
+                $('.seek:last .goalAmount').text(element.goalAmount)
+                $('.seek:last .donateAmount').text(element.donateAmount)
+                $('.seek:last .donateCount').text(element.donateCount)
+                $('.seek:last .detailPage').attr('href', $('.seek:last .detailPage').attr('href') + element.seekId);
+                if (element.status == 'RAISING') {
+                    $('.seek:last .status').text('募集中')
+                } else if (element.status == 'EXPIRED') {
+                    $('.seek:last .status').text('已过期')
+                } else if (element.status == 'COMPLETED') {
+                    $('.seek:last .status').text('已完成')
+                } else if (element.status == 'REMITTED') {
+                    $('.seek:last .status').text('已打款')
+                } else if (element.status == 'HOSPITAL_REFUSED' || element.status == 'PLAT_REFUSED') {
+                    $('.seek:last .status').text('已拒绝')
+                } else if (element.status == 'UNBORN' || element.status == 'HOSPITAL_PASS') {
+                    $('.seek:last .status').text('待审核')
+                }
+            });
+
+        } else if (data.code == 26) {
+            location.href = '/salvation/u/wxoauth2authorize?go=myseeks.html';
+        }
+    })
+
+
+</script>
+</html>

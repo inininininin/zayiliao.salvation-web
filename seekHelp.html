@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html class=" js csstransforms3d"><head>
+    <meta charset="utf-8">
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>求助列表</title>
+    <link rel="stylesheet" href="/salvation/css/base.css">
+    <link rel="stylesheet" href="/salvation/css/page.css">
+    <!--[if lte IE 8]>
+    <link href="/salvation/css/ie8.css" rel="stylesheet" type="text/css"/>
+    <![endif]-->
+    <script src="http://libs.baidu.com/jquery/2.0.0/jquery.min.js"></script>
+    <script src="http://static.runoob.com/assets/vue/1.0.11/vue.min.js"></script>
+    <script type="text/javascript" src="/salvation/js/main.js"></script>
+    <!--[if IE]>
+    <script src="http://libs.useso.com/js/html5shiv/3.7/html5shiv.min.js"></script>
+    <![endif]-->
+</head>
+
+<body style="background: #f6f5fa;"  id="app">
+<!--content S-->
+<div class="super-content RightMain" id="RightMain">
+    <!--header-->
+    <div class="superCtab">
+        <div class="ctab-title clearfix">
+            <h3>求助列表</h3>
+            <div class="tp-mng-box clearfix">
+                <select v-model="status" class="tp-zhongduan" style="float: right;margin-right: 20px;">
+                    <option v-for="option in options" v-bind:value="option.value">
+                        {{ option.text }}
+                    </option>
+                </select>
+                <span style="float: right;line-height: 30px;">状态：</span>
+            </div>
+        </div>
+        <div class="ctab-Main">
+            <div class="ctab-Mian-cont">
+                <div class="Mian-cont-btn clearfix" style="height: 15px;">
+                </div>
+
+                <div class="Mian-cont-wrap">
+                    <div class="defaultTab-T">
+                        <table border="0" cellspacing="0" cellpadding="0" class="defaultTable">
+                            <tbody>
+                            <tr>
+                                <th class="t_1">标题</th>
+                                <th class="t_1">姓名</th>
+                                <th class="t_1">手机号</th>
+                                <th class="t_1">医院名称</th>
+                                <th class="t_1">筹款总额</th>
+                                <th class="t_1">已筹金额</th>
+                                <th class="t_1">提交时间</th>
+                                <th class="t_1">状态</th>
+                                <th class="t_1">操作</th>
+                            </tr>
+                            </tbody></table>
+                    </div>
+                    <table border="0" cellspacing="0" cellpadding="0" class="defaultTable defaultTable2">
+                        <tbody>
+                        <tr v-for="item in items">
+                            <td class="t_1">{{item.title}}</td>
+                            <td class="t_1">{{item.user.realname}}</td>
+                            <td class="t_1">{{item.user.phone}}</td>
+                            <td class="t_1">{{item.hospital.name}}</td>
+                            <td class="t_1">{{item.goalAmount + ' 元'}}</td>
+                            <td class="t_1">{{item.donateAmount + ' 元'}}</td>
+                            <td class="t_1">{{new Date(parseInt(item.addTime)).toLocaleString()}}</td>
+                            <td class="t_1">{{item.status=='UNBORN'?'未处理':item.status=='RAISING'?'募集中':item.status=='HOSPITAL_PASS'?'医院同意':item.status=='HOSPITAL_REFUSED'?'医院拒绝':item.status=='PLAT_REFUSED'?'平台拒绝':item.status=='EXPIRED'?'已过期':item.status=='COMPLETED'?'已完成':'已打款'}}</td>
+                            <td class="t_1"><div class="btn"><a href="javascript:;" class="modify" @click="passSeek(item.seekId)">通过</a><a href="javascript:;" class="delete" @click="refuseSeek(item.seekId)">拒绝</a></div></td>
+                        </tr>
+                        </tbody>
+                    </table>
+                    <!--pages S-->
+                    <div class="pageSelect">
+                        <span>共 <b>{{sum.totalItemCount}}</b> 条 每页 <b>{{pageSize}} </b>条   {{toPageNo}}/{{sum.totalPageCount}}</span>
+                        <div class="pageWrap">
+                            <a class="pagePre" @click="pagePre"><i class="ico-pre">&nbsp;</i></a>
+                            <a href="#" class="pagenumb" @click="pageJump($event,num+1)" v-bind:class="{'cur': num+1 == toPageNo}" v-for="num in sum.totalPageCount" v-model="toPageNo">{{num + 1}}</a>
+                            <a class="pagenext" @click="pagenext"><i class="ico-next">&nbsp;</i></a>
+                        </div>
+                    </div>
+                    <!--pages E-->
+                </div>
+
+            </div>
+        </div>
+    </div>
+    <!--main-->
+
+</div>
+<!--content E-->
+
+<script src="/salvation/js/layer.js"></script>
+<script>
+    (function(){
+        /*layer.config({
+         //extend: 'myskin/style.css', //加载新皮肤
+         skin: 'layer-ext-myskin' //一旦设定，所有弹层风格都采用此主题。
+         });*/
+        var data = {
+            items: [],
+            sum: [],
+            options:[
+                { text: '不限', value: ' ',selected:true},
+                { text: '未处理', value: 'UNBORN',selected:false},
+                { text: '医院拒绝', value: 'HOSPITAL_REFUSED',selected:false},
+                { text: '医院同意', value: 'HOSPITAL_PASS',selected:false},
+                { text: '平台拒绝', value: 'PLAT_REFUSED',selected:false},
+                { text: '募集中', value: 'RAISING',selected:false},
+                { text: '已过期', value: 'EXPIRED',selected:false},
+                { text: '已完成', value: 'COMPLETED',selected:false},
+                { text: '已打款', value: 'REMITTED',selected:false}
+            ],
+            status:'',
+            toPageNo: 1,
+            pageSize: 20,
+            seekHelpUrl: '/salvation/m/seeks'
+        };
+        var vm = new Vue({
+            el: '#app',
+            data: data,
+            methods: {
+                //获取求助列表
+                getSeekHelpList: function () {
+                    $.ajax({
+                        type: 'GET',
+                        data: {status: this.status,toPageNo: this.toPageNo, pageSize: this.pageSize},
+                        url: this.seekHelpUrl,
+                        success: function(data){
+                            console.log(data);
+                            vm.$data.items = data.items;
+                            vm.$data.sum = data.sum;
+                        }
+                    })
+                },
+                //通过求助
+                passSeek: function(id){
+                    layer.open({
+                        type: 1
+                        ,title: false //不显示标题栏
+                        ,closeBtn: false
+                        ,area: '300px;'
+                        ,shade: 0.8
+                        ,id: 'LAY_layuipro' //设定一个id，防止重复弹出
+                        ,btn: ['确定', '取消']
+                        ,moveType: 1 //拖拽模式，0或者1
+                        ,content: '<div style="padding: 50px; line-height: 22px; background-color: #393D49; color: #fff; font-weight: 300;">确定通过此求助吗？</div>'
+                        ,success: function(layero){
+                            var btn = layero.find('.layui-layer-btn');
+                            btn.css('text-align', 'center');
+                            btn.find('.layui-layer-btn0').on('click',function(){
+                                $.ajax( {
+                                    type: 'POST',
+                                    data: {seek_id:id,audit:'PLAT_PASS'},
+                                    url: '/seek/plataudit',
+                                    success: function(data){
+                                        layer.msg('已通过');
+                                        vm.getSeekHelpList();
+                                    },
+                                    error: function(xhr){
+                                        layer.msg(JSON.parse(xhr.responseText).error);
+                                    }
+                                } )
+                            });
+                        }
+                    });
+                },
+                //拒绝求助
+                refuseSeek: function(id){
+                    layer.open({
+                        type: 1
+                        ,title: false //不显示标题栏
+                        ,closeBtn: false
+                        ,area: '350px;'
+                        ,shade: 0.8
+                        ,id: 'LAY_layuipro' //设定一个id，防止重复弹出
+                        ,btn: ['确定', '取消']
+                        ,moveType: 1 //拖拽模式，0或者1
+                        ,content: '<div style="padding: 50px; line-height: 22px; background-color: #393D49;"><span style="color: #fff; font-weight: 300;">确定要拒绝此救助吗？</span><br/><br/><br/><input type="text" style="width: 100%;padding: 5px;"><p style="color: red;">*请输入拒绝原因，必填<br/></p></div>'
+                        ,success: function(layero){
+                            var btn = layero.find('.layui-layer-btn');
+                            btn.css('text-align', 'center');
+                            btn.find('.layui-layer-btn0').on('click',function(){
+                                var reason = $(this).parent().parent().children().children().children('input').val();
+                                if(reason != ''){
+                                    $.ajax( {
+                                        type: 'POST',
+                                        data: {seek_id:id,audit: 'PLAT_REFUSED',status_note:reason},
+                                        url: '/seek/plataudit',
+                                        success: function(data){
+                                            layer.msg('已拒绝');
+                                            vm.getSeekHelpList();
+                                        },
+                                        error: function(xhr){
+                                            layer.msg(JSON.parse(xhr.responseText).error);
+                                        }
+                                    } )
+                                }else{
+                                    layer.msg('请输入拒绝原因');
+                                }
+                            });
+                        }
+                    });
+                },
+                //上一页
+                pagePre: function () {
+                    if(this.toPageNo == 1){
+                        alert('已经是第一页啦')
+                    }else{
+                        vm.$data.toPageNo --;
+                        vm.getSeekHelpList();
+                    }
+                },
+                //下一页
+                pagenext: function () {
+                    if(this.toPageNo == vm.$data.sum.totalPageCount){
+                        alert('已经是最后一页啦')
+                    }else{
+                        vm.$data.toPageNo ++;
+                        vm.getSeekHelpList();
+                    }
+                },
+                //点击页数跳转
+                pageJump: function(e,num){
+                    vm.$data.toPageNo = num;
+                    vm.getSeekHelpList();
+                }
+            },
+            watch :{
+                'status':'getSeekHelpList'
+            }
+        });
+        vm.getSeekHelpList();
+        // $watch 是一个实例方法
+        /*vm.$watch('toPageNo', vm.pageJump)*/
+
+    })()
+
+</script>
+
+</body></html>

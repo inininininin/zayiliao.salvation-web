@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+
+    <title></title>
+    <script src="/salvation/js/jquery-1.11.3.js"></script>
+    <script src="/salvation/js/user-api.js"></script>
+    <script src="/salvation/js/common-api.js"></script>
+    <script src="/salvation/js/oss-api.js"></script>
+    <script src="/salvation/js/util.js"></script>
+    <script src="/salvation/js/json2.js"></script>
+    <script src="http://apps.bdimg.com/libs/jquery.cookie/1.4.1/jquery.cookie.js"></script>
+
+    <style>
+        .pushSeekParam {
+            border-bottom-style: solid;
+            border-bottom-color: #e5e5e5;
+            border-bottom-width: 1px;
+            height: 45px;
+            font-size: 20px;
+            line-height: 50px;
+
+        }
+
+        .pop{
+            /*display: none;*/
+            position: fixed;
+            width: 120px;
+            height: 120px;
+            top: 40%;
+            left: 35%;
+            background: #000000;
+            color: #ffffff;
+            text-align: center;
+            z-index: 100;
+            opacity: 0.8;
+            font-size: 14px;
+            border-radius: 5px;
+        }
+        .displayNone{
+            display: none;
+        }
+        .displayBlock{
+            display: block;
+        }
+    </style>
+    <script>
+        var salvationUserToken = $.cookie('salvationUserToken');
+        var salvationUser ;
+        if (!salvationUserToken) {
+            location.href = '/salvation/u/wxoauth2authorize?go=pushseek.html';
+        } else {
+            userApi.api10053(function (data) {
+                if (data.code == 0) {
+                    salvationUser=data.data;
+                } else if (data.code == 26) {
+                    location.href = '/salvation/u/wxoauth2authorize?go=pushseek.html';
+                }else{
+                    alert(data.message);
+                }
+            })
+
+
+            if (!salvationUser || !salvationUser.phone || !salvationUser.realname || !salvationUser.address || !salvationUser.idCardNo) {
+                alert('请先补全个人信息')
+                location.href = 'usercenter.html?go=pushseek.html';
+            }
+
+        }
+    </script>
+</head>
+
+<body style="margin: 0;background-color: #f2f2f2;width:100%;">
+
+<div style="margin-top:20px;margin-left: 15px;font-size: 14px;color: #666;height:25px;;"><span style="">基本信息</span>
+</div>
+<div class="pushSeekParam" style="padding-left: 15px;padding-right: 15px;height:45px;background-color: white;">
+    <span style="font-size: 14px;color: #333;display: inline-block;width:105px;">目标金额</span>
+    <input  name="goalAmount" style="font-size: 14px;color: #333;width:50%;line-height: 28px;border: none" type="number" pattern="[0-9]*"
+           placeholder="输入目标金额"/>
+</div>
+<div class="pushSeekParam" style="padding-left: 15px;padding-right: 15px;height:45px;background-color: white;">
+    <span style="font-size: 14px;color: #333;display: inline-block;width:105px;">资金用途</span>
+    <input placeholder="输入资金用途" name="raiseUsage"
+           style="font-size: 14px;color: #333;width:50%;line-height: 28px;border: none" type="text"/>
+</div>
+<div class="pushSeekParam" onclick="showHospital()"
+     style="padding-left: 15px;padding-right: 15px;height:45px;background-color: white;position: relative;">
+    <span style="font-size: 14px;color: #333;display: inline-block;width:105px;">救治医院</span><span class="hospitalName"
+                                                                                                  style="font-size: 14px;color: #333;width:50%;line-height: 28px;border: none"></span><img
+        src="/salvation/enter.png" onclick="showHospital()" style="width:6px;height:12px;position: absolute;right:10px;top:20px;"/>
+</div>
+<div class="pushSeekParam" style="padding-left: 15px;padding-right: 15px;height:45px;background-color: white;">
+    <span style="font-size: 14px;color: #333;display: inline-block;width:105px;">截止日期</span><input style="border: none"
+                                                                                                   name="endTime"
+                                                                                                   type="date" min=""/>
+</div>
+
+<div style="margin-top:20px;margin-left: 15px;font-size: 14px;color: #666;height:25px;"><span style="">主体资料</span></div>
+<div class="pushSeekParam" style="padding-left: 15px;padding-right: 15px;height:45px;background-color: white;">
+    <span style="font-size: 14px;color: #333;display: inline-block;width:105px;">标题</span>
+    <input name="title" style="font-size: 14px;color: #333;width:50%;line-height: 28px;border: none" type="text"
+           placeholder="输入目标标题"/>
+
+</div>
+<div class="pushSeekParam" style="padding-left: 15px;padding-right: 15px;height:45px;background-color: white;">
+    <span style="font-size: 14px;color: #333;display: inline-block;width:105px;">患者姓名</span>
+    <input style="font-size: 14px;color: #333;width:50%;line-height: 28px;border: none" name="patientRealname"
+           placeholder="输入患者姓名" type="text"/>
+</div>
+<div class="pushSeekParam" style="padding-left: 15px;padding-right: 15px;height:45px;background-color: white;">
+    <span style="font-size: 14px;color: #333;display: inline-block;width:105px;">收款人</span>
+    <input placeholder="输入收款人" style="font-size: 14px;color: #333;width:50%;line-height: 28px;border: none"
+        name="parentRealname" type="text"/>
+</div>
+<div style="margin-top:20px;margin-left: 15px;font-size: 14px;color: #666;height:25px;"><span style="">详细描述</span></div>
+
+<div class="" style="background-color: white;padding: 15px;">
+    <textarea name="description" placeholder="建议详细描述家庭、经济、患病经历"
+              style="width:100%;height:150px;border:none;resize:none;padding:0;"></textarea>
+</div>
+<div style="margin-top:20px;margin-left: 15px;font-size: 14px;color: #666;height:25px;"><span style="">上传图片（最多6张）</span>
+</div>
+
+    <form id="pics" style="padding:15px;background-color: white;">
+
+
+        <div  style="width:80px;height:80px;position: relative;margin-right:7px;display: inline-block;">
+            <input onchange="preview(this)" name="file" type="file" style="display: inline-block; opacity: 0;filter: alpha(opacity=0);position: absolute;top:0;left:0;width:100%;height:100%" />
+            <img class="previewImg" src="" style="display: inline-block;width:100%;height:100%" />
+        </div>
+        <div style="width:80px;height:80px;position: relative;margin-right:7px;display: inline-block;">
+            <input onchange="preview(this)" name="file" type="file" style="display: inline-block; opacity: 0;filter: alpha(opacity=0);position: absolute;top:0;left:0;width:100%;height:100%" />
+            <img class="previewImg" src="" style="display: inline-block;width:100%;height:100%" />
+        </div>
+        <div style="width:80px;height:80px;position: relative;margin-right:7px;display: inline-block;">
+            <input onchange="preview(this)" name="file" type="file" style="display: inline-block; opacity: 0;filter: alpha(opacity=0);position: absolute;top:0;left:0;width:100%;height:100%" />
+            <img class="previewImg" src="" style="display: inline-block;width:100%;height:100%" />
+        </div>
+        <div style="width:80px;height:80px;position: relative;display: inline-block;margin-right:7px;">
+            <input onchange="preview(this)" name="file" type="file" style="display: inline-block; opacity: 0;filter: alpha(opacity=0);position: absolute;top:0;left:0;width:100%;height:100%" />
+            <img class="previewImg" src="" style="display: inline-block;width:100%;height:100%" />
+        </div>
+
+        <div style="width:80px;height:80px;position: relative;margin-right:7px;display: inline-block;">
+            <input onchange="preview(this)" name="file" type="file" style="display: inline-block; opacity: 0;filter: alpha(opacity=0);position: absolute;top:0;left:0;width:100%;height:100%" />
+            <img class="previewImg" src="" style="display: inline-block;width:100%;height:100%" />
+        </div>
+        <div style="width:80px;height:80px;position: relative;margin-right:7px;display: inline-block;">
+            <input onchange="preview(this)" name="file" type="file" style="display: inline-block; opacity: 0;filter: alpha(opacity=0);position: absolute;top:0;left:0;width:100%;height:100%" />
+            <img class="previewImg" src="" style="display: inline-block;width:100%;height:100%" />
+        </div>
+        <!--<div style="width:80px;height:80px;position: relative;margin-right:7px;display: inline-block;">-->
+            <!--<input onchange="preview(this)" name="file" type="file" style="display: inline-block; opacity: 0;filter: alpha(opacity=0);position: absolute;top:0;left:0;width:100%;height:100%" />-->
+            <!--<img class="previewImg" src="/salvation/" style="display: inline-block;width:100%;height:100%" />-->
+        <!--</div>-->
+        <!--<div style="width:80px;height:80px;position: relative;display: inline-block;">-->
+            <!--<input onchange="preview(this)" name="file" type="file" style="display: inline-block; opacity: 0;filter: alpha(opacity=0);position: absolute;top:0;left:0;width:100%;height:100%" />-->
+            <!--<img class="previewImg" src="/salvation/" style="display: inline-block;width:100%;height:100%" />-->
+        <!--</div>-->
+    </form>
+
+
+<div style="line-height:30px;height:30px;margin: 20px 15px 8px 15px;border: 0">
+    <button class="addSupport" onclick="pushSeek()"
+            style="width:100%;height: 100%;text-align: center;border:0;background-color: #ff6600;border-radius:5px;color:white;font-size: 16px;">
+        提交申请
+    </button>
+</div>
+
+
+<div id="hospital"
+     style="width:100%;height:100%;background-color: white;z-index: 999; position: fixed;top:0;right:0;display: none">
+    <!--<p style="font-size: 20px;text-align: center;width: 100%;margin: 0;padding: 0;height: 30px;color: #000">选择医院</p>-->
+    <select style="height:30px;;width:100%;font-size: 20px;margin-top: 10px;"
+            onchange="$('#hospital').hide();$('.hospitalName').text($('#hospital select option:selected').text())"
+            size="100">
+
+    </select>
+
+</div>
+
+<div class="pop displayNone">
+    <img src="/salvation/imgs/loading.gif" alt="" style="width: 57px;margin: 19px auto 12px" /><br/>
+    <span style="text-align: center">正在上传</span>
+</div>
+</body>
+
+<script>
+    //获取当前时间后的30天为截止时间并且转化显示出来
+    function getLocalTime(nS) {
+        return new Date(parseInt(nS)).toLocaleString().replace(/:\d{1,2}$/,' ');
+    }
+    var current = (new Date()).getTime();
+    var future = current + 30 * 24 * 3600 * 1000;
+//    var time=getLocalTime(future);
+    //        var time=getLocalTime(future).split("下"||"上");
+    //        var time=getLocalTime(future).split("上"||"下");
+    //        //截取"上"或者"下"之前的字符串
+//    var time1=time[0];
+//    alert(time)
+
+    function preview(ele) {
+
+        var previewImg = $(ele).next().get(0);
+        var file = ele.files[0];
+        var reader = new FileReader();
+        reader.onloadend = function () {
+            previewImg.src = reader.result;
+        }
+        if (file) {
+            reader.readAsDataURL(file);
+        } else {
+            previewImg.src = "";
+        }
+
+    }
+    function showHospital() {
+        $('#hospital').show();
+        $('#hospital select').html("");
+        $('#hospital select').append('<option style="padding:0 15px;" value="">个人申报</option>');
+        commonApi.api30040(null, null, null, 1, 100, function (data) {
+
+            $(data.data.items).each(function (index, element) {
+                $('#hospital select').append('<option style="padding:0 15px;" value="' + element.hospitalId + '">' + element.name + '</option>');
+            });
+        });
+    }
+
+//    function pushSeek() {
+    $('.addSupport').click(function(){
+//        $('.pop').removeClass('displayNone')
+//        $('.pop').addClass('displayBlock')
+//    })
+//        alert('456465')
+       $('.addSupport').attr({"disabled":true})
+
+        var hospitalName = $('.hospitalName').html()
+        var goalAmount = $('[name=goalAmount]')[0].value;
+        var endTime = $('[name=endTime]')[0].value;
+        var raiseUsage = $('[name=raiseUsage]')[0].value;
+        var patientRealname = $('[name=patientRealname]')[0].value;
+        var parentRealname = $('[name=parentRealname]')[0].value;
+//        endTime = Date.parse(endTime);
+        endTime=future
+//        console.log(endTime)
+        var title = $('[name=title]')[0].value;
+        var description = $('[name=description]')[0].value;
+        var hospitalId = $('#hospital select')[0].value;
+        var pic = null;
+
+        ossApi.fileUpload(null, 'pics', function (data) {
+            pic = data.data.url;
+        })
+//        alert(pic)
+        if (goalAmount == '') {
+            alert("目标金额不能为空")
+//            $('.pop').removeClass('displayBlock')
+//            $('.pop').addClass('displayNone')
+            $('.addSupport').attr({"disabled":false})
+
+        } else if (endTime == '') {
+            alert("结束时间不能为空")
+//            $('.pop').removeClass('displayBlock')
+//            $('.pop').addClass('displayNone')
+            $('.addSupport').attr({"disabled":false})
+        }
+        else if (raiseUsage == '') {
+            alert("资金用途不能为空")
+//             $('.pop').removeClass('displayBlock')
+//            $('.pop').addClass('displayNone')
+            $('.addSupport').attr({"disabled":false})
+        } else if (patientRealname == '') {
+            alert("患者姓名不能为空")
+//             $('.pop').removeClass('displayBlock')
+//            $('.pop').addClass('displayNone')
+            $('.addSupport').attr({"disabled":false})
+        } else if (parentRealname == '') {
+            alert("收款人姓名不能为空")
+//             $('.pop').removeClass('displayBlock')
+//            $('.pop').addClass('displayNone')
+            $('.addSupport').attr({"disabled":false})
+            $('.pop').hide();
+        } else if (title == '') {
+            alert("目标标题不能为空")
+//             $('.pop').removeClass('displayBlock')
+//            $('.pop').addClass('displayNone')
+            $('.addSupport').attr({"disabled":false})
+            $('.pop').hide();
+        } else if (description == '') {
+            alert("项目描述不能为空")
+//             $('.pop').removeClass('displayBlock')
+//            $('.pop').addClass('displayNone')
+            $('.addSupport').attr({"disabled":false})
+            $('.pop').hide();
+        } else if (hospitalName == '') {
+            alert("医院不能为空")
+//             $('.pop').removeClass('displayBlock')
+//            $('.pop').addClass('displayNone')
+            $('.addSupport').attr({"disabled":false})
+            $('.pop').hide();
+        } else if (pic.length < 8) {
+            alert("上传图片不能为空")
+//             $('.pop').removeClass('displayBlock')
+//            $('.pop').addClass('displayNone')
+            $('.addSupport').attr({"disabled":false})
+        } else {
+//            $('.pop').show();
+            userApi.seekPush(goalAmount, title, raiseUsage, endTime, description, hospitalId, pic, patientRealname, parentRealname, function (data) {
+                if (data.code == 0) {
+//                    $('.pop').removeClass('displayBlock')
+//                    $('.pop').addClass('displayNone')
+                    location.href = "myseeks.html";
+                } else if (data.code == 41) {
+//                    $('.pop').removeClass('displayBlock')
+//                    $('.pop').addClass('displayNone')
+                    location.href = "usercenter.html?go=pushseek.html";
+                    $('.addSupport').attr({"disabled":false})
+                }
+                else if (data.code == 26){
+//                    $('.pop').removeClass('displayBlock')
+//                    $('.pop').addClass('displayNone')
+                    location.href = '/salvation/u/wxoauth2authorize?go=pushseek.html';
+                    $('.addSupport').attr({"disabled":false});
+                }
+
+                else
+                {
+                    alert(data.message);
+//                    $('.pop').removeClass('displayBlock');
+//                    $('.pop').addClass('displayNone');
+                    $('.addSupport').attr({"disabled":false})
+                }
+            });
+
+        }
+
+//        userApi.seekPush(goalAmount, title, raiseUsage, endTime, description, hospitalId, pic, patientRealname, parentRealname, function (data) {
+//            if (data.code == 0)
+//                location.href="/salvation/myseeks.html";
+//            else if (data.code == 41){
+//                location.href = "usercenter.html?go=pushseek.html";
+//            }
+//            else if (data.code == 26)
+//                location.href = '/salvation/u/wxoauth2authorize?go=pushseek.html';
+//            else
+//                alert(data.message)
+//        });
+//    }
+    })
+
+</script>
+
+
+</html>

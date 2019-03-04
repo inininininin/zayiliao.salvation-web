@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>捐助</title>
+    <script src="/salvation/js/jquery-1.11.3.js"></script>
+    <script src="/salvation/js/user-api.js"></script>
+    <script src="/salvation/js/common-api.js"></script>
+    <script src="/salvation/js/oss-api.js"></script>
+    <script src="/salvation/js/util.js"></script>
+    <script src="/salvation/http://apps.bdimg.com/libs/jquery.cookie/1.4.1/jquery.cookie.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+    <style>
+
+    </style>
+    <script>
+        var seek;
+        var salvationUser;
+        var seekId = util.getUrlParam('seekId');
+        var salvationUserToken = $.cookie('salvationUserToken');
+        if (!salvationUserToken) {
+            location.href = '/salvation/u/wxoauth2authorize?go=donate.html?seekId=' + seekId;
+        } else {
+
+            userApi.api10053(function (data) {
+                if (data.code == 0) {
+                    salvationUser = data.data;
+                } else if (data.code == 26) {
+                    location.href = '/salvation/u/wxoauth2authorize?go=donate.html?seekId=' + seekId;
+                } else {
+                    alert(data.message);
+                }
+            })
+
+            if (!salvationUser || !salvationUser.phone || !salvationUser.realname || !salvationUser.address || !salvationUser.idCardNo) {
+                alert('请先补全个人信息')
+                location.href = 'usercenter.html?go=donate.html?seekId=' + seekId;
+            }
+
+            userApi.api10052(seekId, function (data) {
+                seek = data.data;
+            })
+        }
+
+    </script>
+</head>
+
+<body style="margin: 0;background-color: #cccccc;width:100%">
+<div style="width: 100%;background-color: white;padding-left:10px">
+    <img class="pic" src="" style="margin-top: 8px;margin-bottom:-8px;width:35px;height:35px;border-radius:50%;overflow: hidden; "/>
+    <span class="title" style="font-size:24px;display: inline-block;width: 80%;overflow: hidden;line-height: 50px"></span>
+</div>
+<div class="patientRealname"
+     style="width: 100%;background-color: white;padding-left:10px;margin-top:10px;border-bottom: solid 1px #dcdcdc;line-height: 40px">
+    <span>受助人（患者）：</span><span class="context"></span></div>
+<div class="parentRealname"
+     style="width: 100%;background-color: white;padding-left:10px;line-height: 40px;margin-bottom: 10px">
+    <span>收款人（父亲）：</span><span class="context"></span></div>
+<div class="amount"
+     style="width: 100%;background-color: white;padding-left:10px;margin-top:10px;border-bottom: solid 1px #dcdcdc;line-height: 40px">
+    <span>捐助金额</span><input type="text"
+                            style="width:50%;margin-left: 20px;line-height: 30px;border:none;text-align: right"/>元
+</div>
+<div style="width: 100%;background-color: white;padding-left:10px;line-height: 40px;margin-bottom: 10px">
+    <span>微信支付</span><span></span></div>
+<textarea class="message" style="width:100%;height:200px;border:none;"></textarea>
+
+<div onclick="donate()"
+     style="line-height:30px;width:70%;height:30px;margin: 0 auto;text-align: center;margin-top: 20px;background-color: #ff6600;border-radius:5px;">
+    确认支付
+</div>
+</body>
+
+<script>
+
+    $('.patientRealname .context').text(seek.patientRealname);
+    $('.parentRealname .context').text(seek.parentRealname);
+    $('.pic').attr('src', seek.user.headImgUrl);
+    $('.title ').text(seek.title);
+    function donate() {
+        var amount = $('.amount input')[0].value;
+        var message = $('.message')[0].value;
+        userApi.api10010(seekId, amount, message, function (data) {
+            if (data.code == 0) {
+                userApi.payment(data.data.donateId, "WXH5", function (data) {
+                    if (typeof WeixinJSBridge == "undefined") {
+                        if (document.addEventListener) {
+                            document.addEventListener('WeixinJSBridgeReady', onBridgeReady, false);
+                        } else if (document.attachEvent) {
+                            document.attachEvent('WeixinJSBridgeReady', onBridgeReady);
+                            document.attachEvent('onWeixinJSBridgeReady', onBridgeReady);
+                        }
+                    } else {
+                        onBridgeReady(data.data, 'seekdetail.html?seekId=' + seekId);
+                    }
+                })
+            } else {
+                alert(data.message)
+            }
+        })
+    }
+
+
+    function onBridgeReady(pay, returnUrl) {
+
+//        "data": {
+//            "timestamp": "1476437966",
+//                    "noncestr": "K7GXV32xu3kiztPF",
+//                    "signType": "MD5",
+//                    "package": "prepay_id=wx20161014173926a80b1826b60036725810",
+//                    "appid": "wx521838ffd0137c9a",
+//                    "paySign": "FD5D4A60B94408940E91CC4546A49C8F"
+        WeixinJSBridge.invoke(
+                'getBrandWCPayRequest', {
+                    "appId": pay.appId,     //公众号名称，由商户传入     
+                    "timeStamp": pay.timeStamp,         //时间戳，自1970年以来的秒数     
+                    "nonceStr": pay.nonceStr, //随机串     
+                    "package": pay.pack,
+                    "signType": "MD5",         //微信签名方式：     
+                    "paySign": pay.paySign //微信签名 
+                },
+                function (res) {
+                    if (res.err_msg == "get_brand_wcpay_request:ok") {
+                        location.href = returnUrl;
+
+                    }     // 使用以上方式判断前端返回,微信团队郑重提示：res.err_msg将在用户支付成功后返回    ok，但并不保证它绝对可靠。
+
+
+                }
+        );
+    }
+</script>
+
+
+</html>

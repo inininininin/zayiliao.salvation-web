@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html class=" js csstransforms3d"><head>
+    <meta charset="utf-8">
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>医院管理</title>
+    <link rel="stylesheet" href="/salvation/css/base.css">
+    <link rel="stylesheet" href="/salvation/css/page.css">
+    <!--[if lte IE 8]>
+    <link href="/salvation/css/ie8.css" rel="stylesheet" type="text/css"/>
+    <![endif]-->
+    <script src="http://libs.baidu.com/jquery/2.0.0/jquery.min.js"></script>
+    <script src="http://static.runoob.com/assets/vue/1.0.11/vue.min.js"></script>
+    <script type="text/javascript" src="/salvation/js/main.js"></script>
+    <!--[if IE]>
+    <script src="http://libs.useso.com/js/html5shiv/3.7/html5shiv.min.js"></script>
+    <![endif]-->
+</head>
+
+<body style="background: #f6f5fa;"  id="app">
+<!--content S-->
+<div class="super-content RightMain" id="RightMain">
+    <!--header-->
+    <div class="superCtab">
+        <div class="ctab-title clearfix"><h3>医院管理</h3></div>
+        <div class="ctab-Main">
+            <div class="ctab-Mian-cont">
+                <div class="Mian-cont-btn clearfix">
+                    <div class="operateBtn">
+                        <a href="javascript:;" @click="changeCheck" class="greenbtn add sp-add">添加医院</a>
+                    </div>
+                   <!-- <div class="searchBar">
+                        <input type="text" id="" value="" v-model="hospitalName" class="form-control srhTxt" placeholder="输入医院名称搜索">
+                        <input type="button" class="srhBtn" @click="getHospital()" value="">
+                    </div>-->
+                </div>
+                
+                <div class="Mian-cont-wrap">
+                    <div class="defaultTab-T">
+                        <table border="0" cellspacing="0" cellpadding="0" class="defaultTable">
+                            <tbody><tr><th class="t_1">医院ID</th><th class="t_2">医院名称</th><th class="t_3">负责人</th><th class="t_3">浏览次数</th><th class="t_4">操作</th></tr>
+                            </tbody></table>
+                    </div>
+                    <table border="0" cellspacing="0" cellpadding="0" class="defaultTable defaultTable2">
+                        <tbody>
+                            <tr  v-for="item in items">
+                                <td class="t_1">{{item.hospitalId}}</td>
+                                <td class="t_2">{{item.name}}</td>
+                                <td class="t_3" v-if="item.user.wxNickname">{{item.user.realname}}</td>
+                                <td class="t_3" v-else="">无</td>
+                                <td class="t_3">{{item.times}}</td>
+                                <td class="t_4">
+                                    <div class="btn">
+                                        <a href="javascript:;" class="modify" @click="getHospitalDetail(item.hospitalId)">修改</a>
+                                        <!--<a href="/salvation/javascript:;" class="delete" @click="delHospital(item.hospitalId)">删除</a>-->
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <!--pages S-->
+                    <div class="pageSelect">
+                        <span>共 <b>{{sum.totalItemCount}}</b> 条 每页 <b>{{pageSize}} </b>条   {{toPageNo}}/{{sum.totalPageCount}}</span>
+                        <div class="pageWrap">
+                            <a class="pagePre" @click="pagePre"><i class="ico-pre">&nbsp;</i></a>
+                            <a href="#" class="pagenumb" @click="pageJump($event,num+1)" v-bind:class="{'cur': num+1 == toPageNo}" v-for="num in sum.totalPageCount" v-model="toPageNo">{{num + 1}}</a>
+                            <a class="pagenext" @click="pagenext"><i class="ico-next">&nbsp;</i></a>
+                        </div>
+                    </div>
+                    <!--pages E-->
+                </div>
+
+            </div>
+        </div>
+    </div>
+    <!--main-->
+
+</div>
+<!--content E-->
+
+<div class="layuiBg" @click="clearInfo"></div><!--公共遮罩-->
+
+<!--点击添加分类弹出-->
+<div class="addFeileibox layuiBox">
+    <div class="layer-title clearfix"><h2>添加医院</h2><span class="layerClose" @click="clearInfo"></span></div>
+    <div class="layer-content">
+        <div class="aFllink clearfix"><span>医院名称：</span><input id="hospitalName" v-model="hospitalName" type="text"></div>
+        <div class="aFllink clearfix"><span>负责人员：</span><input id="userName" v-model="userName" type="text"></div>
+        <div class="aFllink clearfix"><span>公司网址：</span><input id="url" v-model="url" type="text"></div>
+        <div class="aFllink clearfix"><span>访问次数：</span><input id="times" v-model="times" type="text"></div>
+        <div class="aFlBtn"><input type="button" value="保存" class="saveBtn" @click="addHospital"></div>
+    </div>
+</div>
+
+<script src="/salvation/js/layer.js"></script>
+<script>
+    (function(){
+        /*layer.config({
+            //extend: 'myskin/style.css', //加载新皮肤
+            skin: 'layer-ext-myskin' //一旦设定，所有弹层风格都采用此主题。
+        });*/
+        var data = {
+            check: true,
+            items: [],
+            sum: [],
+            hospitalId:'',
+            hospitalName:'',
+            userName: '',
+            userId:'',
+            url: '',
+            times: '',
+            toPageNo: 1,
+            pageSize: 20,
+            errorMsg: '',
+            getHospitalUrl:'/salvation/c/30040',
+            getUserIdUrl: '/salvation/m/users',
+            addHospitalUrl: '/salvation/m/hospitaladd',
+            delHospitalUrl: '/salvation/m/hospitaldel',
+            modifyHospitalUrl: '/salvation/m/hospitalalter'
+        };
+        var vm = new Vue({
+            el: '#app',
+            data: data,
+            methods: {
+                //获取医院列表
+                getHospital: function () {
+                    $.ajax({
+                        type: 'POST',
+                        data: {name: this.hospitalName, userId: this.userId, toPageNo: this.toPageNo, pageSize: this.pageSize},
+                        url: this.getHospitalUrl,
+                        success: function(data){
+                            vm.$data.items = data.data.items;
+                            vm.$data.sum = data.data.sum;
+                        }
+                    })
+                },
+                //获取用户ID
+                getUserId: function () {
+                    $.ajax({
+                        type: 'POST',
+                        data: {realname:this.userName},
+                        url: this.getUserIdUrl,
+                        success: function(data){
+                            //if(vm.$data.check){
+                                if(data.items.length == 0){
+                                    layer.msg('查无此用户！');
+                                    vm.$data.userName = '';
+                                    $('#userName').css('border-color','red');
+                                }else{
+                                    vm.$data.userId = data.items[0].userId;
+                                    console.log(vm.$data.userId);
+                                    $('#userName').css('border-color','#cdcdcd');
+                                }
+                            //}
+                        }
+                    })
+                },
+                //添加医院
+                addHospital: function () {
+                    if(this.hospitalName == ''){
+                        $('#hospitalName').css('border-color','red');
+                    }
+                    if(this.userId == ''){
+                        $('#userName').css('border-color','red');
+                    }
+                    if(this.url == ''){
+                        $('#url').css('border-color','red');
+                    }
+                    if(this.times == ''){
+                        $('#times').css('border-color','red');
+                    }
+                    //modify
+                    if(this.hospitalId != ''&&this.hospitalName != ''&&this.userId != ''&&this.url != ''&&this.times != ''){
+                        console.log(this.userId);
+                        $.ajax({
+                            type: 'PUT',
+                            data: {hospitalId: this.hospitalId,name: this.hospitalName, userId: this.userId, url: this.url, times: this.times},
+                            url: this.modifyHospitalUrl,
+                            success: function(data){
+                                layer.msg('修改成功！');
+                                vm.getHospital();
+                            }
+                        })
+                    }else if(this.hospitalName != ''&&this.userId != ''&&this.url != ''&&this.times != ''){
+                        $.ajax({
+                            type: 'POST',
+                            data:{name: this.hospitalName, userId: this.userId, url: this.url, times: this.times},
+                            url:this.addHospitalUrl,
+                            success: function(data){
+                                vm.getHospital();
+                            }
+                        })
+                    }
+                },
+                //获取医院详情
+                getHospitalDetail: function (id) {
+                    this.check = false;
+                    $(".layuiBg").css({
+                        display: "block", height: $(document).height()
+                    });
+                    $(".addFeileibox").css({
+                        left: ($("body").width() - $(".addFeileibox").width()) / 2 - 20 + "px",
+                        top: ($(window).height() - $(".addFeileibox").height()) / 2 + $(window).scrollTop() + "px",
+                        display: "block"
+                    });
+                    $.ajax({
+                        type: 'POST',
+                        data: {hospitalId: id},
+                        url: this.getHospitalUrl,
+                        success: function(data){
+                            vm.$data.hospitalId = data.data.items[0].hospitalId;
+                            vm.$data.hospitalName = data.data.items[0].name;
+                            vm.$data.userId = data.data.items[0].user.userId;
+                            vm.$data.userName = data.data.items[0].user.realname;
+                            vm.$data.url = data.data.items[0].url;
+                            vm.$data.times = data.data.items[0].times;
+                        }
+                    })
+                },
+                //删除医院
+                /*delHospital: function (id) {
+                    layer.confirm('确定要删除此医院吗？', {
+                        title: '提示',
+                        btn: ['确定', '取消'], //可以无限个按钮
+                        btn1: function(index, layero){
+                            $.ajax({
+                                type: 'DELETE',
+                                url:vm.$data.delHospitalUrl+'?hospitalId='+id,
+                                success: function(data){
+                                    vm.getHospital();
+                                }
+                            })
+                        }
+                    });
+                },*/
+                //清除信息
+                clearInfo: function () {
+                    vm.$data.hospitalId = '';
+                    vm.$data.hospitalName = '';
+                    vm.$data.userId = '';
+                    vm.$data.userName = '';
+                    vm.$data.url = '';
+                    vm.$data.times = '';
+                },
+                //check状态改变
+                changeCheck: function () {
+                    this.check = true;
+                },
+                //上一页
+                pagePre: function () {
+                    if(this.toPageNo == 1){
+                        layer.msg('已经是第一页啦')
+                    }else{
+                        vm.$data.toPageNo --;
+                        vm.getHospital();
+                    }
+                },
+                //下一页
+                pagenext: function () {
+                    if(this.toPageNo == vm.$data.sum.totalPageCount){
+                        layer.msg('已经是最后一页啦')
+                    }else{
+                        vm.$data.toPageNo ++;
+                        vm.getHospital();
+                    }
+                },
+                //点击页数跳转
+                pageJump: function(e,num){
+                    vm.$data.toPageNo = num;
+                    vm.getHospital();
+                },
+                checkHospitalName: function () {
+                    if(this.check){
+                        if(this.hospitalName == ''){
+                            $('#hospitalName').css('border-color','red');
+                        }else{
+                            $('#hospitalName').css('border-color','#cdcdcd');
+                        }
+                    }
+                },
+                checkUrl: function () {
+                    if(this.check){
+                        if(this.url == ''){
+                            $('#url').css('border-color','red');
+                        }else{
+                            $('#url').css('border-color','#cdcdcd');
+                        }
+                    }
+                },
+                checkTimes: function () {
+                    if(this.check){
+                        if(this.times == ''){
+                            $('#times').css('border-color','red');
+                        }else{
+                            $('#times').css('border-color','#cdcdcd');
+                        }
+                    }
+                }
+            },
+            watch :{
+                'hospitalName':'checkHospitalName',
+                'userName':'getUserId',
+                'url':'checkUrl',
+                'times':'checkTimes'
+            }
+        });
+        vm.getHospital();
+        // $watch 是一个实例方法
+        /*vm.$watch('toPageNo', vm.pageJump)*/
+
+    })()
+
+</script>
+
+</body></html>

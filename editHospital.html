@@ -1,0 +1,263 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <title>南京晨勉科技有限公司</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="keywords" content="Modern Responsive web template, Bootstrap Web Templates, Flat Web Templates, Andriod Compatible web template,
+Smartphone Compatible web template, free webdesigns for Nokia, Samsung, LG, SonyErricsson, Motorola web design" />
+    <link rel="stylesheet" href="/salvation/plugins/layui/css/layui.css" media="all" />
+    <link rel="stylesheet" href="/salvation/css/global.css" media="all">
+    <link rel="stylesheet" href="/salvation/plugins/font-awesome/css/font-awesome.min.css">
+    <link rel="stylesheet" href="/salvation/css/table.css" />
+    <script type="text/javascript" src="/salvation/plugins/layui/layui.js"></script>
+    <script type="application/x-javascript"> addEventListener("load", function() { setTimeout(hideURLbar, 0); }, false); function hideURLbar(){ window.scrollTo(0,1); } </script>
+
+    <!-- jQuery -->
+    <script src="/salvation/js/jquery-3.0.0.min.js"></script>
+    <script type="text/javascript" charset="utf-8">
+        var ueSubProjectName="ueditor";
+    </script>
+    <script type="text/javascript" charset="utf-8" src="/salvation/ueditor/ueditor.config.js"></script>
+    <script type="text/javascript" charset="utf-8" src="/salvation/ueditor/ueditor.all.min.js"> </script>
+    <!--建议手动加在语言，避免在ie下有时因为加载语言失败导致编辑器加载失败-->
+    <!--这里加载的语言文件会覆盖你在配置项目里添加的语言类型，比如你在配置项目里配置的是英文，这里加载的中文，那最后就是中文-->
+    <script type="text/javascript" charset="utf-8" src="/salvation/ueditor/lang/zh-cn/zh-cn.js"></script>
+    <style>
+        body{
+            box-sizing: border-box;
+            padding: 20px;
+            font-size: 16px;
+        }
+        .layui-btn:hover {
+            opacity: .8;
+            filter: alpha(opacity=80);
+            color: #fff;
+        }
+        .layui-btn {
+            display: inline-block;
+            height: 38px;
+            line-height: 38px;
+            padding: 0 18px;
+            background-color: #009688;
+            color: #fff;
+            white-space: nowrap;
+            text-align: center;
+            border: none;
+            border-radius: 2px;
+            cursor: pointer;
+            opacity: .9;
+            filter: alpha(opacity=90);
+        }
+        .control-label{
+            display: inline-block;
+            margin-bottom: 5px;;
+        }
+        select{
+            margin-left: 20px;
+            padding: 0 20px;
+            cursor: pointer;
+            height: 38px;
+            line-height: 38px;
+            line-height: 36px\9;
+            border: 1px solid #e6e6e6;
+            background-color: #fff;
+            border-radius: 2px;
+        }
+        select:hover{
+            border-color: #D2D2D2!important;
+        }
+    </style>
+
+</head>
+<body>
+    <div id="wrapper">
+    <!-- Navigation -->
+    <nav class="top1 navbar navbar-default navbar-static-top" role="navigation" style="margin-bottom: 0">
+        <!-- /.navbar-static-side -->
+    </nav>
+    <div id="page-wrapper">
+        <div class="col-md-12 graphs">
+            <div class="xs">
+                <div class="form-group">
+                    <label class="control-label">医院名称：</label><br/>
+                    <input type="text" name="hospital" lay-verify="required" class="layui-input layui-form-danger" placeholder="请输入医院名称"/><br/>
+                </div>
+                <br/>
+                <div class="form-group">
+                    <label class="control-label">医院介绍：</label>
+                    <script id="editor" type="text/plain" style="width:100%;height:500px;"></script>
+                </div>
+
+                <div class="layui-form-item" style="margin: 30px 0 100px;;">
+                    请选择地区：
+                    <select id="provinceId">
+                        <option value=" " selected="">——请选择——</option>
+                    </select>
+
+                    <select id="cityId">
+                        <option value=" " selected="">——请选择——</option>
+                    </select>
+
+                    <select id="districtId">
+                        <option value=" " selected="">——请选择——</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <button id="save" class="layui-btn" style="margin-top: 30px;">确认</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- /#page-wrapper -->
+</div>
+<!-- /#wrapper -->
+<!-- Nav CSS -->
+    <!-- Metis Menu Plugin JavaScript -->
+    <script src="/salvation/js/metisMenu.min.js"></script>
+    <script src="/salvation/js/custom.js"></script>
+    <script src="/salvation/js/oss-api.js"></script>
+    <script>
+    function getRequest() {
+        var url = location.search; //获取url中"?"符后的字串
+        var theRequest = new Object();
+        if (url.indexOf("?") != -1) {
+            var str = url.substr(1);
+            strs = str.split("&");
+            for(var i = 0; i < strs.length; i ++) {
+                theRequest[strs[i].split("=")[0]]=unescape(strs[i].split("=")[1]);
+            }
+        }
+        return theRequest;
+    }
+    //实例化编辑器
+    //建议使用工厂方法getEditor创建和引用编辑器实例，如果在某个闭包下引用该编辑器，直接调用UE.getEditor('editor')就能拿到相关的实例
+    var ue = UE.getEditor('editor');
+
+    function getContent() {
+        var arr = [];
+        arr.push(UE.getEditor('editor').getContent());
+        return (arr.join("\n"));
+    }
+    layui.use(['form', 'laypage','layer'], function() {
+        var $ = layui.jquery,
+                form = layui.form(),
+                layer = parent.layer === undefined ? layui.layer : parent.layer;
+
+        var id = getRequest().id;
+        if(id != ''){
+            $.ajax( {
+                type: 'POST',
+                data:{hospitalId:id},
+                url: '/salvation/c/hospitaldetail',
+                success: function(data){
+                    if(data.code == 0){
+                        $('[name="hospital"]').val(data.data.hospitalName);
+                        var body = document.getElementById('ueditor_0').contentDocument.body;
+                        body.innerHTML = data.data.hospitalIntrouction;
+                    }
+                }
+            } )
+        }else{
+            $.ajax({
+                type: 'GET',
+                url: '/salvation/c/provinces',
+                success: function(data){
+                    if(data.code == 0){
+                        for(var i = 0 ; i < data.data.items.length ; i ++){
+                            $('#provinceId').append('<option value="'+ data.data.items[i].id+'" >'+ data.data.items[i].name+'</option>');
+                        }
+                    }else{
+                        alert(data.message);
+                    }
+                }
+            })
+        }
+
+        $('#provinceId').change(function(){
+            var provinceId = $(this).val();
+            $.ajax({
+                type: 'GET',
+                data: {provinceId:provinceId},
+                url: '/salvation/c/cities',
+                success: function(data){
+                    if(data.code == 0){
+                        var $cityId = $('#cityId');
+                        $('#cityId>option:gt(0)').remove();
+                        $('#districtId>option:gt(0)').remove();
+                        for(var i = 0 ; i < data.data.items.length ; i ++) {
+                            $cityId.append('<option value="' + data.data.items[i].id + '" >' + data.data.items[i].name + '</option>');
+                        }
+                    }
+                }
+            })
+        })
+
+        $('#cityId').change(function(){
+            var cityId = $(this).val();
+            $.ajax({
+                type: 'GET',
+                data: {cityId:cityId},
+                url: '/salvation/c/districts',
+                success: function(data){
+                    if(data.code == 0){
+                        var $districtId = $('#districtId');
+                        $('#districtId>option:gt(0)').remove();
+                        for(var i = 0 ; i < data.data.items.length ; i ++) {
+                            $districtId.append('<option value="' + data.data.items[i].id + '" >' + data.data.items[i].name + '</option>');
+                        }
+                    }
+                }
+            })
+        })
+        $('#save').click(function(){
+            var introduce = getContent();
+            var name = $('[name="hospital"]').val();
+            if(id != ''){
+                if(name != ''){
+                    $.ajax( {
+                        type: 'POST',
+                        data: {hospitalId:id,hospitalName:name,hospitalIntrouction:introduce},
+                        url: '/salvation/m/hospitalalter',
+                        success: function(data){
+                            if(data.code == 0){
+                                alert('修改成功！');
+                                history.go(-1);
+                            }else if(data.code == 20){
+                                alert('请先登录！');
+                            }else{
+                                alert(data.message);
+                            }
+                        }
+                    } )
+                }else{
+                    alert('医院名称不能为空！');
+                }
+            }else{
+                if(name != ''){
+                    $.ajax( {
+                        type: 'POST',
+                        data: {hospitalName:name,hospitalIntrouction:introduce},
+                        url: '/salvation/m/hospitaladd',
+                        success: function(data){
+                            if(data.code == 0){
+                                alert('添加成功！');
+                                history.go(-1);
+                            }else if(data.code == 20){
+                                alert('请先登录！');
+                                window.parent.location.href = 'login.html';
+                            }else{
+                                alert(data.message);
+                            }
+                        }
+                    } )
+                }else{
+                    alert('医院名称不能为空！');
+                }
+            }
+        });
+    })
+</script>
+</body>
+</html>

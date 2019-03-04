@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>用户登录</title>
+    <link rel="stylesheet" href="/salvation/css/base.css" />
+    <link rel="stylesheet" href="/salvation/css/login.css" />
+</head>
+<body>
+<div class="superlogin"></div>
+<div class="loginBox">
+    <div class="logo"><img src="/salvation/imgs/logo_login.png"/></div>
+    <div class="loginMain">
+        <div class="tabwrap">
+            <table border="0" cellspacing="0" cellpadding="0">
+                <tr><td class="title">用户名：</td><td><input type="text" id="uname" class="form-control txt" /></td></tr>
+                <tr><td class="title">密   码：</td><td><input type="password" id="password" class="form-control txt" /></td></tr>
+                <tr class="errortd"><td>&nbsp;</td><td><i class="ico-error"></i><span class="errorword">用户名或密码错误，请重新输入！</span></td></tr>
+                <tr><td>&nbsp;</td><td><input type="button" class="loginbtn" value="登录" id="login"/><input type="button" class="resetbtn" value="重置" onclick="location.href='loginA.html'"/></td></tr>
+                <tr><td>&nbsp;</td><td class="forgetpsw"><a href="/salvation/#" id="forget">忘记密码？</a></td></tr>
+            </table>
+        </div>
+    </div>
+</div>
+<script src="http://libs.baidu.com/jquery/2.0.0/jquery.min.js"></script>
+<script src="/salvation/js/login.js"></script>
+</body>
+</html>

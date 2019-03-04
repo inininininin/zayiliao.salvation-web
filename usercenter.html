@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+    <title>用户中心</title>
+    <script src="/salvation/js/jquery-1.11.3.js"></script>
+    <script src="/salvation/js/user-api.js"></script>
+    <script src="/salvation/js/common-api.js"></script>
+    <script src="/salvation/js/oss-api.js"></script>
+    <script src="/salvation/js/util.js"></script>
+
+    <script src="/salvation/http://apps.bdimg.com/libs/jquery.cookie/1.4.1/jquery.cookie.js"></script>
+     <!--<script src="/salvation/js/vconsole.min.js"></script>-->
+
+    <style>
+        .pushSeekParam {
+            border-style: solid none solid none;
+            border-color: #cecece;
+            border-width: 1px;
+            height: 60px;
+            font-size: 28px;
+            line-height: 57px;
+        }
+        html,body{
+            overflow-x: hidden;
+        }
+    </style>
+    <script>
+        var go = util.getUrlParam('go');
+
+
+        var salvationUserToken = $.cookie('salvationUserToken');
+        var salvationUser;
+        if (!salvationUserToken) {
+            location.href = '/salvation/u/wxoauth2authorize?go=usercenter.html';
+        } else {
+            userApi.api10053(function (data) {
+                if (data.code == 0) {
+                    salvationUser = data.data;
+                } else if (data.code == 26) {
+                    location.href = '/salvation/u/wxoauth2authorize?go=usercenter.html';
+                } else {
+                    alert(data.message);
+                }
+            })
+        }
+
+
+    </script>
+</head>
+
+<body style="margin: 0;background-color: #f2f2f2">
+
+<div style="padding-left: 15px;padding-right: 15px;height:45px;background-color: white;line-height: 45px;">
+    <span style="font-size: 14px;color: #333;display: inline-block;width:105px;">头像</span>
+
+    <div style="float: right;">
+        <div style="width:35px;height:35px;position: relative;display: inline-block;">
+            <form id="headImgUrl">
+                <input onchange="preview(this,'previewImg')" name="file" type="file"
+                       style=" opacity: 0;filter: alpha(opacity=0);position: absolute;top:0;left:0;width:100%;height:100%; "/>
+            </form>
+            <img class="previewImg" src=""
+                 style="vertical-align: middle;width:100%;height:100%;border-radius:50%;overflow: hidden; "/>
+        </div>
+        <img src="/salvation/enter.png" style="vertical-align: middle;width: 6px;height:12px;margin-left:5px;"/>
+    </div>
+</div>
+
+<div class="pushSeekParam"
+     style="padding-left: 15px;padding-right: 15px;height:45px;background-color: white;line-height: 45px;">
+    <span style="font-size: 14px;color: #333;display: inline-block;width:105px;">手机号</span>
+    <input class="phone" name="phone"
+           onblur="if(this.value!=salvationUser.phone){$('.verifyCodeDiv').show()}else{$('.verifyCodeDiv').hide()}"
+           style="font-size: 14px;color: #333;width:50%;line-height: 28px;border: none" type="text"/>
+</div>
+<div class="verifyCodeDiv" class="pushSeekParam"
+     style="padding-left: 15px;padding-right: 15px;height:45px;background-color: white;line-height: 45px;display: none;">
+    <span style="font-size: 14px;color: #333;display: inline-block;width:105px;">验证码</span>
+    <input name="verifyCode" style="font-size: 14px;color: #333;width:100px;;line-height: 28px;border: none" type="text"/>
+    <button class="send_Verification_change_a" style="float:right;margin-right:20px;text-align:center;height:45px;border:0;font-size: 14px;line-height: 43px;color: #333;display: inline-block;width:70px;">发送</button>
+</div>
+
+<div class="pushSeekParam"
+     style="padding-left: 15px;padding-right: 15px;height:45px;background-color: white;line-height: 45px;">
+    <span style="font-size: 14px;color: #333;display: inline-block;width:105px;">身份证号</span>
+    <input name="idCardNo" style="font-size: 14px;color: #333;width:50%;line-height: 28px;border: none" type="text"/>
+
+</div>
+
+<div class="pushSeekParam"
+     style="padding-left: 15px;padding-right: 15px;height:45px;background-color: white;line-height: 45px;">
+    <span style="font-size: 14px;color: #333;display: inline-block;width:105px;">真实姓名</span>
+    <input name="realname" style="font-size: 14px;color: #333;width:50%;line-height: 28px;border: none" type="text"/>
+
+</div>
+<div class="pushSeekParam"
+     style="padding-left: 15px;padding-right: 15px;height:45px;background-color: white;line-height: 45px;">
+    <span style="font-size: 14px;color: #333;display: inline-block;width:105px;">地址</span>
+    <input name="address" style="font-size: 14px;color: #333;width:50%;line-height: 28px;border: none" type="text"/>
+
+</div>
+
+
+<div onclick="alterUserInfo()"
+     style="line-height:30px;height:30px;margin: 20px 15px 8px 15px;text-align: center;background-color: #ff6600;border-radius:5px;color:white;font-size: 16px;">
+    提交
+</div>
+</body>
+
+<script>
+    $('.send_Verification_change_a').click(function(){
+        var time = 60;
+        var me = $(this);
+
+//            $(this).unbind('click')
+        $('.send_Verification_change_a').attr({"disabled":true});
+        var phone=$('.phone').val();
+            $.ajax( {
+                type:'post',
+                data:"phone="+phone,
+                url:'/salvation/c/sendverifycode',
+                async:true,
+                success: function(data){
+                    if(data.code == 0){
+                        var timer = setInterval(function(){
+                            time --;
+                            me.html(time + ' s');
+                            if(time == 0){
+                                clearInterval(timer);
+                                me.html('发送');
+                                $('.send_Verification_change_a').attr({"disabled":false})
+                            }
+                        },1000);
+                    }else{
+                        $('.tanchuang1').css('display','block')
+                        $('.wenzi1').html(data.message)
+//                            $('.send_Verification_change_a').bind('click')
+//                            me.html('获取验证码');
+                        $('.send_Verification_change_a').attr({"disabled":false})
+//                            alert(data.message);
+                    }
+                },
+                error: function(xhr,msg,reasonString){
+//                        $('.tanchuang1').css('display','block')
+//                        $('.wenzi1').html('请求错误，请稍后再试...')
+//                        alert('请求错误，请稍后再试...');
+                    console.log(arguments);
+                }
+            } );
+    });
+
+//    function sendVerifyCode() {
+//        commonApi.sendVerifyCode({phone: $('[name=phone]')[0].value}, function (data) {
+//            if (data.code == 0) {
+//
+//            } else {
+//                alert(data.message)
+//            }
+//        })
+//    }
+
+
+    $('[name=address]')[0].value = salvationUser.address;
+    $('[name=realname]')[0].value = salvationUser.realname;
+    $('[name=idCardNo]')[0].value = salvationUser.idCardNo;
+    $('[name=phone]')[0].value = salvationUser.phone;
+    $('.previewImg').attr('src', salvationUser.headImgUrl);
+
+    function alterUserInfo() {
+        var headImgUrl;
+        if ($('#headImgUrl [name=file]').val() != '') {
+            ossApi.fileUpload(null, 'headImgUrl', function (data) {
+                headImgUrl = data.data.url;
+            })
+        }
+        var address = $('[name=address]')[0].value;
+        var realname = $('[name=realname]')[0].value;
+        var idCardNo = $('[name=idCardNo]')[0].value;
+        var phone = $('[name=phone]')[0].value;
+        var verifyCode = $('[name=verifyCode]')[0].value;
+
+
+        userApi.api10020(verifyCode, phone, realname, idCardNo, address, headImgUrl, function (data) {
+            if (data.code == 0) {
+                alert('成功');
+                if (go)
+                    location.href = go;
+            } else
+                alert(data.message)
+        });
+    }
+
+    function preview(ele, targetClass) {
+
+        var previewImg = $('.' + targetClass)[0];
+        var file = ele.files[0];
+        var reader = new FileReader();
+        reader.onloadend = function () {
+            previewImg.src = reader.result;
+        }
+        if (file) {
+            reader.readAsDataURL(file);
+        } else {
+            previewImg.src = "";
+        }
+
+    }
+</script>
+
+
+</html>
